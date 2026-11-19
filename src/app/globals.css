@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #fbf8f3;
+  --color-card: #ffffff;
+  --color-ink: #1f1b16;
+  --color-muted: #6b6258;
+  --color-line: #e8e1d6;
+  --color-basil: #2f6b4f;
+  --color-basil-soft: #e4f0e9;
+  --color-tomato: #c9472b;
+  --color-tomato-soft: #fbe6e0;
+  --color-amber: #b7791f;
+  --color-amber-soft: #fbf0d9;
+  --color-sky: #2f5f8a;
+  --color-sky-soft: #e3edf6;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+}
+@utility btn-primary {
+  @apply btn bg-basil text-white hover:bg-[#25573f];
+}
+@utility btn-secondary {
+  @apply btn border border-line bg-card text-ink hover:bg-paper;
+}
+@utility btn-danger {
+  @apply btn border border-tomato/30 bg-card text-tomato hover:bg-tomato-soft;
+}
+@utility btn-ghost {
+  @apply btn text-muted hover:bg-black/5 hover:text-ink;
+}
+@utility input {
+  @apply w-full rounded-lg border border-line bg-card px-3 py-2 text-sm outline-none transition focus:border-basil focus:ring-2 focus:ring-basil/20;
+}
+@utility label {
+  @apply mb-1 block text-xs font-medium uppercase tracking-wide text-muted;
+}
+@utility card {
+  @apply rounded-xl border border-line bg-card;
+}
+@utility th {
+  @apply px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-muted;
+}
+@utility td {
+  @apply px-3 py-2 align-middle;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+}
