@@ -28,6 +28,14 @@ export default async function AuditPage() {
   const { score, findings } = auditMenu(dishes, analysis, restaurant.targetFoodCost);
   const t = analysis.totals;
   const sorted = [...analysis.dishes].sort((a, b) => (b.foodCostPct ?? -1) - (a.foodCostPct ?? -1));
+  const engineered = analysis.dishes.filter((d) => d.menuClass && (d.monthlySales ?? 0) > 0);
+  const catGroups = new Map<string, typeof engineered>();
+  for (const d of engineered) catGroups.set(d.category ?? "Senza sezione", [...(catGroups.get(d.category ?? "Senza sezione") ?? []), d]);
+  const singles = [...catGroups.values()].filter((g) => g.length < 2).flat();
+  const matrixGroups = [
+    ...[...catGroups.entries()].filter(([, g]) => g.length >= 2).map(([title, dishes]) => ({ title, dishes })),
+    ...(singles.length ? [{ title: "Sezioni con un solo piatto (confronto sull'intero menu)", dishes: singles, reference: engineered }] : []),
+  ];
   const byClass = (["star", "plowhorse", "puzzle", "dog"] as MenuClass[]).map((c) => ({ c, list: analysis.dishes.filter((d) => d.menuClass === c) }));
 
   return (
@@ -65,7 +73,10 @@ export default async function AuditPage() {
         <h2 className="mb-3 font-serif text-xl font-semibold">Matrice popolarità × margine</h2>
         {t.hasSales ? (
           <div className="grid gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2"><MenuMatrix dishes={analysis.dishes} /></div>
+            <div className="space-y-4 lg:col-span-2">
+              {matrixGroups.map((g) => <MenuMatrix key={g.title} title={g.title} dishes={g.dishes} reference={"reference" in g ? g.reference : undefined} />)}
+              <p className="text-xs text-muted">Ogni piatto è confrontato con gli altri della stessa sezione (un dolce non compete con un secondo). Linee tratteggiate: soglia di popolarità (70% della quota media) e margine medio ponderato. Passa sopra un punto per i dettagli.</p>
+            </div>
             <div className="space-y-3">
               {byClass.map(({ c, list }) => (
                 <div key={c} className="card p-4">

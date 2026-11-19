@@ -12,7 +12,7 @@ agente AI che prepara la strategia e generatore del nuovo menu stampabile.
 | **Food cost** | Scarti/cali peso per ingrediente, semilavorati (preparazioni con resa) ripartiti in proporzione, IVA inclusa/esclusa, simulatore di prezzo, prezzo consigliato arrotondato ai 50 centesimi. |
 | **Audit menu** | Punteggio, problemi di economia/struttura/testi/dati, matrice popolarità × margine (Star, Cavalli da tiro, Enigmi, Cani), ingredienti critici, rincari dei fornitori. |
 | **Agente strategia** | Legge i numeri e il contesto del locale (senza soglie rigide) e produce diagnosi, punti forti/deboli, piano d'azione a 3 orizzonti con impatto stimato, verdetto piatto per piatto, indicazioni di menu design e descrizioni riscritte. |
-| **Nuovo menu** | Menu A4 stampabile/PDF in 3 stili, sezioni ordinate dall'agente, piatti da spingere in box in cima alla sezione, prezzi senza € e non incolonnati, piatti da eliminare nascondibili. |
+| **Nuovo menu** | Menu A4 stampabile/PDF in 3 stili che guida le scelte verso i piatti più redditizi con quattro leve attivabili: **ordine strategico** (piatti da spingere nella prima e nell'ultima posizione della sezione, le più lette; food cost alto al centro), **ganci visivi** (box "Consigliato dallo chef", badge "Specialità della casa"), **riprova sociale** ("Tra i più scelti dai clienti" solo se confermato dalle vendite reali) e **sottolineature**. I piatti con food cost alto restano nel menu ma senza ganci e con meno peso visivo. Un pannello spiega il ruolo di ogni piatto e permette di forzarlo a mano. Prezzi senza € e non incolonnati. |
 
 ## Costi AI (scelta qualità/prezzo)
 
@@ -70,6 +70,7 @@ Apri http://localhost:3000.
 ```
 src/lib/costing.ts      motore di calcolo (puro, testabile)
 src/lib/audit.ts        regole dell'audit del menu
+src/lib/menu-nudge.ts   leve di vendita del nuovo menu (ruoli, ganci, ordine)
 src/lib/ai/scan.ts      lettura di menu, fatture e ricette (schemi + prompt)
 src/lib/ai/strategy.ts  agente strategia
 src/lib/fatturapa.ts    parser della fattura elettronica XML

@@ -249,18 +249,29 @@ export function analyzeMenu(
     };
   });
 
-  // Menu engineering (metodo Kasavana & Smith) sui piatti con ricetta e vendite
+  // Menu engineering (metodo Kasavana & Smith) sui piatti con ricetta e vendite.
+  // Il confronto avviene tra piatti della stessa sezione (un dolce non compete con un secondo);
+  // le sezioni con un solo piatto analizzabile vengono confrontate con l'intero menu.
   const engineered = analyses.filter((a) => a.hasRecipe && (a.monthlySales ?? 0) > 0);
-  const totalSales = engineered.reduce((s, a) => s + (a.monthlySales ?? 0), 0);
-  if (engineered.length >= 2 && totalSales > 0) {
-    const popThreshold = (1 / engineered.length) * 0.7;
-    const avgMargin = engineered.reduce((s, a) => s + a.margin * (a.monthlySales ?? 0), 0) / totalSales;
-    for (const a of engineered) {
-      const popular = (a.monthlySales ?? 0) / totalSales >= popThreshold;
+  const classify = (group: DishAnalysis[], targets: DishAnalysis[]) => {
+    const sales = group.reduce((s, a) => s + (a.monthlySales ?? 0), 0);
+    if (group.length < 2 || sales <= 0) return;
+    const popThreshold = (1 / group.length) * 0.7;
+    const avgMargin = group.reduce((s, a) => s + a.margin * (a.monthlySales ?? 0), 0) / sales;
+    for (const a of targets) {
+      const popular = (a.monthlySales ?? 0) / sales >= popThreshold;
       const profitable = a.margin >= avgMargin;
       a.menuClass = popular ? (profitable ? "star" : "plowhorse") : profitable ? "puzzle" : "dog";
     }
+  };
+  const byCategory = new Map<string, DishAnalysis[]>();
+  for (const a of engineered) byCategory.set(a.category ?? "", [...(byCategory.get(a.category ?? "") ?? []), a]);
+  const singles: DishAnalysis[] = [];
+  for (const group of byCategory.values()) {
+    if (group.length >= 2) classify(group, group);
+    else singles.push(...group);
   }
+  if (singles.length) classify(engineered, singles);
 
   const withRecipe = analyses.filter((a) => a.foodCostPct != null);
   const hasSales = engineered.length > 0;

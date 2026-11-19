@@ -9,10 +9,23 @@ export default async function MenuDesignPage() {
   const { restaurant } = await requireRestaurant();
   const [{ recipes, analysis }, latest] = await Promise.all([loadRestaurantData(restaurant), loadLatestStrategy(restaurant.id)]);
   const strategy = latest ? (JSON.parse(latest.data) as Strategy) : null;
-  const classById = new Map(analysis.dishes.map((d) => [d.id, d.menuClass]));
+  const byId = new Map(analysis.dishes.map((d) => [d.id, d]));
   const dishes = recipes
     .filter((r) => r.kind === "dish")
-    .map((r) => ({ id: r.id, name: r.name, category: r.category, description: r.description, price: r.price, menuClass: classById.get(r.id) ?? null }));
+    .map((r) => {
+      const a = byId.get(r.id);
+      return {
+        id: r.id,
+        name: r.name,
+        category: r.category,
+        description: r.description,
+        price: r.price,
+        menuClass: a?.menuClass ?? null,
+        foodCostPct: a?.foodCostPct ?? null,
+        margin: a?.hasRecipe ? a.margin : null,
+        monthlySales: r.monthlySales,
+      };
+    });
 
   return (
     <div>
@@ -21,8 +34,8 @@ export default async function MenuDesignPage() {
           title="Nuovo menu"
           subtitle={
             strategy
-              ? "Impaginato secondo il piano dell'agente: sezioni ordinate, piatti da spingere in evidenza in cima alla sezione, prezzi senza simbolo € e non incolonnati."
-              : "Impaginazione basata sulla matrice: Star ed Enigmi in evidenza. Genera il piano con l'agente per ordine delle sezioni e descrizioni riscritte."
+              ? "Il menu guida le scelte verso i piatti che rendono di più: ordine strategico, ganci visivi, riprova sociale basata sulle vendite reali e sottolineature. I piatti con food cost alto restano, ma in secondo piano."
+              : "Il menu guida le scelte verso i piatti che rendono di più usando food cost, margini e vendite. Genera il piano con l'agente per aggiungere ordine delle sezioni e descrizioni riscritte."
           }
           actions={!strategy ? <Link href="/app/strategia" className="btn-secondary">Genera il piano</Link> : undefined}
         />
@@ -33,6 +46,7 @@ export default async function MenuDesignPage() {
         <MenuDesigner
           restaurantName={restaurant.name}
           city={restaurant.city}
+          targetFoodCost={restaurant.targetFoodCost}
           dishes={dishes}
           aiHighlights={strategy?.menuDesign.highlight ?? []}
           aiOrder={strategy?.menuDesign.categoryOrder ?? []}

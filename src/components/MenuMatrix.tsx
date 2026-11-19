@@ -9,14 +9,16 @@ const QUAD: { cls: MenuClass; label: string; x: "l" | "r"; y: "t" | "b" }[] = [
   { cls: "plowhorse", label: "Cavalli da tiro", x: "r", y: "b" },
 ];
 
-export function MenuMatrix({ dishes }: { dishes: DishAnalysis[] }) {
+/** `reference`: piatti con cui calcolare le soglie (di default gli stessi piatti mostrati). */
+export function MenuMatrix({ dishes, title, reference }: { dishes: DishAnalysis[]; title?: string; reference?: DishAnalysis[] }) {
   const pts = dishes.filter((d) => d.menuClass && (d.monthlySales ?? 0) > 0);
-  if (pts.length < 2) return null;
-  const total = pts.reduce((s, d) => s + (d.monthlySales ?? 0), 0);
-  const avgMargin = pts.reduce((s, d) => s + d.margin * (d.monthlySales ?? 0), 0) / total;
-  const popThreshold = (1 / pts.length) * 0.7;
+  const ref = (reference ?? dishes).filter((d) => d.menuClass && (d.monthlySales ?? 0) > 0);
+  if (pts.length < 1 || ref.length < 2) return null;
+  const total = ref.reduce((s, d) => s + (d.monthlySales ?? 0), 0);
+  const avgMargin = ref.reduce((s, d) => s + d.margin * (d.monthlySales ?? 0), 0) / total;
+  const popThreshold = (1 / ref.length) * 0.7;
 
-  const W = 640, H = 400, P = { l: 52, r: 16, t: 16, b: 40 };
+  const W = 640, H = 320, P = { l: 52, r: 16, t: 16, b: 40 };
   const shares = pts.map((d) => (d.monthlySales ?? 0) / total);
   const maxX = Math.max(...shares, popThreshold) * 1.12;
   const margins = pts.map((d) => d.margin);
@@ -26,11 +28,12 @@ export function MenuMatrix({ dishes }: { dishes: DishAnalysis[] }) {
   const sy = (v: number) => H - P.b - ((v - minY) / (maxY - minY)) * (H - P.t - P.b);
   const tx = sx(popThreshold), ty = sy(avgMargin);
   const labelled = new Set(
-    [...pts].sort((a, b) => (b.monthlyMargin ?? 0) - (a.monthlyMargin ?? 0)).slice(0, 8).map((d) => d.id),
+    [...pts].sort((a, b) => (b.monthlyMargin ?? 0) - (a.monthlyMargin ?? 0)).slice(0, 10).map((d) => d.id),
   );
 
   return (
     <figure className="card p-4">
+      {title && <figcaption className="mb-2 text-sm font-semibold">{title}</figcaption>}
       <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label="Matrice di menu engineering: popolarità sull'asse orizzontale, margine per piatto su quello verticale">
         {QUAD.map((q) => {
           const x = q.x === "l" ? P.l : tx, y = q.y === "t" ? P.t : ty;
@@ -64,12 +67,11 @@ export function MenuMatrix({ dishes }: { dishes: DishAnalysis[] }) {
           );
         })}
       </svg>
-      <figcaption className="mt-2 flex flex-wrap gap-4 text-xs text-muted">
+      <div className="mt-2 flex flex-wrap gap-4 text-xs text-muted">
         {QUAD.map((q) => (
           <span key={q.cls} className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full" style={{ background: COLORS[q.cls] }} />{q.label}</span>
         ))}
-        <span>Linee tratteggiate: soglia di popolarità (70% della quota media) e margine medio ponderato. Passa sopra un punto per i dettagli.</span>
-      </figcaption>
+      </div>
     </figure>
   );
 }
