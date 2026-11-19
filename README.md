@@ -11,6 +11,7 @@ agente AI che prepara la strategia e generatore del nuovo menu stampabile.
 | **Import da foto** | Menu (foto/PDF) → piatti, sezioni, prezzi. Fatture (foto/PDF/**XML FatturaPA**) → prezzi normalizzati a €/kg, €/l, €/pz con storico. Ricette (anche a mano) → ingredienti e quantità divise per porzione. Ogni import passa da una schermata di revisione con abbinamento automatico agli elementi già presenti. |
 | **Food cost** | Scarti/cali peso per ingrediente, semilavorati (preparazioni con resa) ripartiti in proporzione, IVA inclusa/esclusa, simulatore di prezzo, prezzo consigliato arrotondato ai 50 centesimi. |
 | **Audit menu** | Punteggio, problemi di economia/struttura/testi/dati, matrice popolarità × margine (Star, Cavalli da tiro, Enigmi, Cani), ingredienti critici, rincari dei fornitori. |
+| **Ingegneria avanzata** | Secondo livello, sempre per sezione: classi costo-margine di **Pavesic**, **Goal Value** di Hayes & Huffman (con costi variabili non alimentari), **Pareto ABC** sul margine, **principi di Omnes** sulla struttura prezzi (gamma, fasce, rapporto domanda/offerta), **punto di pareggio** degli aumenti di prezzo, leva porzione, **rischio fornitori** dalla volatilità dei prezzi, stress test e **simulazione dello spostamento delle scelte**. Un motore di decisione assegna a ogni piatto le azioni (prezzo, porzione, posizione, proteggi, elimina, fornitore) con impatto mensile stimato in modo prudente. Gli indicatori alimentano anche il nuovo menu e l'agente strategia. |
 | **Agente strategia** | Legge i numeri e il contesto del locale (senza soglie rigide) e produce diagnosi, punti forti/deboli, piano d'azione a 3 orizzonti con impatto stimato, verdetto piatto per piatto, indicazioni di menu design e descrizioni riscritte. |
 | **Nuovo menu** | Menu A4 stampabile/PDF in 3 stili che guida le scelte verso i piatti più redditizi con quattro leve attivabili: **ordine strategico** (piatti da spingere nella prima e nell'ultima posizione della sezione, le più lette; food cost alto al centro), **ganci visivi** (box "Consigliato dallo chef", badge "Specialità della casa"), **riprova sociale** ("Tra i più scelti dai clienti" solo se confermato dalle vendite reali) e **sottolineature**. I piatti con food cost alto restano nel menu ma senza ganci e con meno peso visivo. Un pannello spiega il ruolo di ogni piatto e permette di forzarlo a mano. Prezzi senza € e non incolonnati. |
 
@@ -71,6 +72,7 @@ Apri http://localhost:3000.
 src/lib/costing.ts      motore di calcolo (puro, testabile)
 src/lib/audit.ts        regole dell'audit del menu
 src/lib/menu-nudge.ts   leve di vendita del nuovo menu (ruoli, ganci, ordine)
+src/lib/engineering.ts  ingegneria avanzata e motore di decisione
 src/lib/ai/scan.ts      lettura di menu, fatture e ricette (schemi + prompt)
 src/lib/ai/strategy.ts  agente strategia
 src/lib/fatturapa.ts    parser della fattura elettronica XML

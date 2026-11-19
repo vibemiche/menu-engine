@@ -7,7 +7,7 @@ import { z } from "zod";
 import { aiEnabled, describeAiError, SCAN_MODEL } from "@/lib/ai/client";
 import { runScan, type InvoiceScan, type MenuScan, type RecipeScan, type ScanInput, type ScanKind } from "@/lib/ai/scan";
 import { generateStrategy } from "@/lib/ai/strategy";
-import { loadPriceChanges, loadRestaurantData } from "@/lib/data";
+import { loadEngineering, loadPriceChanges } from "@/lib/data";
 import { db } from "@/lib/db";
 import { aiUsage, ingredientPrices, ingredients, recipeItems, recipes, restaurants, strategyReports } from "@/lib/db/schema";
 import { fatturaAsText, fatturaToInvoiceLines, parseFatturaPA } from "@/lib/fatturapa";
@@ -41,6 +41,7 @@ export async function saveRestaurant(formData: FormData) {
     vatIncluded: formData.get("vatIncluded") === "on",
     vatRate: numOr(formData.get("vatRate"), 10)!,
     targetFoodCost: Math.min(Math.max(numOr(formData.get("targetFoodCost"), 30)!, 5), 80),
+    variableCostPct: Math.min(Math.max(numOr(formData.get("variableCostPct"), 30)!, 0), 80),
   };
   if (existing) {
     await db.update(restaurants).set(values).where(eq(restaurants.id, existing.id));
@@ -498,14 +499,14 @@ export async function importRecipe(input: z.infer<typeof RecipeImportSchema>): P
 export async function runStrategy(): Promise<Result<{ id: string }>> {
   const { restaurant } = await requireRestaurant();
   if (!aiEnabled()) return { ok: false, error: "L'agente strategia richiede la chiave ANTHROPIC_API_KEY nel file .env." };
-  const { analysis } = await loadRestaurantData(restaurant);
+  const { analysis, engineering } = await loadEngineering(restaurant);
   if (analysis.totals.dishCount === 0) return { ok: false, error: "Aggiungi prima i piatti del menu." };
   const changes = await loadPriceChanges(restaurant.id);
   const changeLines = changes
     .slice(0, 20)
     .map((c) => `${c.name}: da ${c.from.toFixed(2)} a ${c.to.toFixed(2)} €/${c.unit} (${c.deltaPct > 0 ? "+" : ""}${c.deltaPct.toFixed(1)}%)`);
   try {
-    const { strategy, model, usage } = await generateStrategy(restaurant, analysis, changeLines);
+    const { strategy, model, usage } = await generateStrategy(restaurant, analysis, changeLines, engineering);
     const [row] = await db
       .insert(strategyReports)
       .values({ restaurantId: restaurant.id, model, data: JSON.stringify(strategy) })

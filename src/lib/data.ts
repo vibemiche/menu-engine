@@ -1,6 +1,7 @@
 import "server-only";
 import { asc, desc, eq, inArray } from "drizzle-orm";
 import { analyzeMenu } from "./costing";
+import { engineerMenu } from "./engineering";
 import { db } from "./db";
 import { ingredientPrices, ingredients, recipeItems, recipes, strategyReports, type Restaurant } from "./db/schema";
 
@@ -60,4 +61,27 @@ export async function loadLatestStrategy(restaurantId: string) {
     .orderBy(desc(strategyReports.createdAt))
     .limit(1);
   return rows[0] ?? null;
+}
+
+/** Volatilità del prezzo di ogni ingrediente: (max − min) / min sullo storico acquisti, in %. */
+export async function loadVolatility(restaurantId: string) {
+  const rows = await db
+    .select({ ingredientId: ingredientPrices.ingredientId, price: ingredientPrices.price })
+    .from(ingredientPrices)
+    .innerJoin(ingredients, eq(ingredients.id, ingredientPrices.ingredientId))
+    .where(eq(ingredients.restaurantId, restaurantId));
+  const range = new Map<string, { min: number; max: number }>();
+  for (const r of rows) {
+    if (r.price <= 0) continue;
+    const e = range.get(r.ingredientId) ?? { min: r.price, max: r.price };
+    e.min = Math.min(e.min, r.price);
+    e.max = Math.max(e.max, r.price);
+    range.set(r.ingredientId, e);
+  }
+  return new Map([...range].map(([id, e]) => [id, ((e.max - e.min) / e.min) * 100]));
+}
+
+export async function loadEngineering(restaurant: Restaurant) {
+  const [data, volatility] = await Promise.all([loadRestaurantData(restaurant), loadVolatility(restaurant.id)]);
+  return { ...data, engineering: engineerMenu(data.analysis, restaurant, volatility) };
 }

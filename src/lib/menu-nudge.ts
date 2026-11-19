@@ -27,6 +27,10 @@ export interface NudgeDish {
   foodCostPct: number | null;
   margin: number | null;
   monthlySales: number | null;
+  /** Indicatori dell'ingegneria avanzata (opzionali) */
+  pavesic?: "prime" | "standard" | "sleeper" | "problem" | null;
+  goalRatio?: number | null;
+  abc?: "A" | "B" | "C" | null;
 }
 
 export interface NudgeOptions {
@@ -65,16 +69,21 @@ function autoRole(d: NudgeDish, sectionAvgMargin: number | null, target: number,
   if (d.menuClass === "plowhorse") return { role: "steer", reason: "Molto venduto ma con margine basso: lo togliamo dai punti caldi per spostare le scelte." };
   if (d.foodCostPct != null && d.foodCostPct > target + 3)
     return { role: "steer", reason: `Food cost ${d.foodCostPct.toFixed(0)}%, sopra il ${target}%: va in mezzo e perde peso visivo.` };
+  if (d.pavesic === "problem")
+    return { role: "steer", reason: "Food cost e margine peggiori della media della sezione: meglio non spingerlo." };
   if (highlighted) return { role: "push", reason: "Indicato dall'agente strategia come piatto da spingere." };
   if (d.menuClass === "star") return { role: "push", reason: "Star: venduto e redditizio, va nei punti più letti (inizio o fine sezione)." };
   if (d.menuClass === "puzzle") return { role: "push", reason: "Enigma: buon margine ma poco scelto, ha bisogno di visibilità." };
+  if (d.pavesic === "prime" && (d.goalRatio ?? 1) >= 0.8)
+    return { role: "push", reason: "Primario: food cost basso e margine alto rispetto alla sezione." };
   if (d.margin != null && sectionAvgMargin != null && d.foodCostPct != null && d.foodCostPct <= target && d.margin >= sectionAvgMargin * 1.05)
     return { role: "push", reason: "Margine in euro sopra la media della sezione con food cost in linea." };
   return { role: "neutral", reason: d.foodCostPct == null ? "Senza ricetta: posizione neutra finché non conosciamo il costo." : "In linea con il resto della sezione." };
 }
 
 /** Punteggio per scegliere quale piatto "spinto" merita i ganci più forti: conta il margine in euro. */
-const pushScore = (d: NudgeDish) => (d.margin ?? 0) * (d.menuClass === "puzzle" ? 1.15 : 1) + (100 - (d.foodCostPct ?? 50)) / 20;
+const pushScore = (d: NudgeDish) =>
+  (d.margin ?? 0) * (d.menuClass === "puzzle" ? 1.15 : 1) + (100 - (d.foodCostPct ?? 50)) / 20 + (d.pavesic === "prime" ? 1 : 0) + Math.min(d.goalRatio ?? 0, 2);
 
 export function nudgeMenu(sections: { name: string; dishes: NudgeDish[] }[], opts: NudgeOptions): NudgedSection[] {
   const highlights = new Set(opts.aiHighlights.map(norm));

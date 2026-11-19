@@ -13,6 +13,7 @@ const LINKS = [
   { href: "/app/preparazioni", label: "Preparazioni", icon: "M5 10h14l-1 9H6zM8 10V6h8v4" },
   { href: "/app/ingredienti", label: "Ingredienti", icon: "M12 3c4 4 6 7 6 10a6 6 0 01-12 0c0-3 2-6 6-10z" },
   { href: "/app/analisi", label: "Audit menu", icon: "M4 20V10M10 20V4M16 20v-7M22 20H2" },
+  { href: "/app/ingegneria", label: "Ingegneria avanzata", icon: "M4 19h16M7 16V9M12 16V5M17 16v-4M5 8l5-4 4 3 5-3" },
   { href: "/app/strategia", label: "Agente strategia", icon: "M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z" },
   { href: "/app/menu-design", label: "Nuovo menu", icon: "M6 3h12v18H6zM9 7h6M9 11h6M9 15h4" },
   { href: "/app/impostazioni", label: "Impostazioni", icon: "M12 15a3 3 0 100-6 3 3 0 000 6zM19 12l2-1-2-4-2 1-2-2V4h-4v2L9 8 7 7l-2 4 2 1v0l-2 1 2 4 2-1 2 2v2h4v-2l2-2 2 1 2-4z" },

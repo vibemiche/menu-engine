@@ -73,6 +73,8 @@ export interface DishAnalysis {
   menuClass: MenuClass | null;
   suggestedPrice: number | null;
   hasRecipe: boolean;
+  /** Ingredienti che pesano di più sul costo del piatto (preparazioni esplose) */
+  topIngredients: { id: string; name: string; cost: number; share: number }[];
   warnings: string[];
 }
 
@@ -222,6 +224,7 @@ export function analyzeMenu(
   const itemCount = new Map<string, number>();
   for (const it of items) itemCount.set(it.recipeId, (itemCount.get(it.recipeId) ?? 0) + 1);
 
+  const ingNames = new Map(ingredients.map((i) => [i.id, i.name]));
   const analyses: DishAnalysis[] = dishes.map((d) => {
     const rc = calc.recipeCost(d.id);
     const price = d.price ?? 0;
@@ -246,6 +249,10 @@ export function analyzeMenu(
         hasRecipe && fc != null && fc > settings.targetFoodCost ? suggestPrice(rc.cost, settings) : null,
       hasRecipe,
       warnings: rc.warnings,
+      topIngredients: [...rc.breakdown.entries()]
+        .map(([ingId, c]) => ({ id: ingId, name: ingNames.get(ingId) ?? "?", cost: c, share: rc.cost > 0 ? c / rc.cost : 0 }))
+        .sort((a, b) => b.cost - a.cost)
+        .slice(0, 3),
     };
   });
 

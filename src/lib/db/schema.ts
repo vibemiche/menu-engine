@@ -85,6 +85,8 @@ export const restaurants = sqliteTable("restaurants", {
   vatRate: real("vat_rate").notNull().default(10),
   /** Riferimento indicativo, non una regola: l'agente AI lo contestualizza. */
   targetFoodCost: real("target_food_cost").notNull().default(30),
+  /** Costi variabili non alimentari in % del prezzo netto (per la Goal Value Analysis) */
+  variableCostPct: real("variable_cost_pct").notNull().default(30),
   createdAt: createdAt(),
 });
 

@@ -43,7 +43,7 @@ export default async function AuditPage() {
       <PageHeader
         title="Audit del menu"
         subtitle="Numeri, struttura e testi del menu: i punti forti da proteggere e quelli deboli su cui lavorare."
-        actions={<><Link href="/app/strategia" className="btn-primary">Chiedi il piano all&apos;agente</Link><Link href="/app/menu-design" className="btn-secondary">Riprogetta il menu</Link></>}
+        actions={<><Link href="/app/ingegneria" className="btn-primary">Ingegneria avanzata</Link><Link href="/app/strategia" className="btn-secondary">Chiedi il piano all&apos;agente</Link><Link href="/app/menu-design" className="btn-secondary">Riprogetta il menu</Link></>}
       />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">

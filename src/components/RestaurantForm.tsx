@@ -31,6 +31,11 @@ export function RestaurantForm({ restaurant, submitLabel }: { restaurant?: Resta
           <label htmlFor="vatIncluded" className="text-sm">I prezzi del menu sono IVA inclusa</label>
         </div>
         <div>
+          <label className="label" htmlFor="variableCostPct">Costi variabili non alimentari (%)</label>
+          <input id="variableCostPct" name="variableCostPct" type="number" step="1" min="0" max="80" className="input" defaultValue={restaurant?.variableCostPct ?? 30} />
+          <p className="mt-1 text-xs text-muted">Personale a ore, energia, packaging, commissioni, in % sul prezzo netto. Serve all&apos;ingegneria avanzata.</p>
+        </div>
+        <div>
           <label className="label" htmlFor="vatRate">Aliquota IVA (%)</label>
           <input id="vatRate" name="vatRate" type="number" step="1" min="0" max="30" className="input" defaultValue={restaurant?.vatRate ?? 10} />
         </div>

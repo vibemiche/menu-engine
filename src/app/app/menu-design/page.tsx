@@ -2,12 +2,13 @@ import Link from "next/link";
 import { MenuDesigner } from "@/components/MenuDesigner";
 import { EmptyState, PageHeader } from "@/components/ui";
 import type { Strategy } from "@/lib/ai/strategy";
-import { loadLatestStrategy, loadRestaurantData } from "@/lib/data";
+import { loadEngineering, loadLatestStrategy } from "@/lib/data";
 import { requireRestaurant } from "@/lib/session";
 
 export default async function MenuDesignPage() {
   const { restaurant } = await requireRestaurant();
-  const [{ recipes, analysis }, latest] = await Promise.all([loadRestaurantData(restaurant), loadLatestStrategy(restaurant.id)]);
+  const [{ recipes, analysis, engineering }, latest] = await Promise.all([loadEngineering(restaurant), loadLatestStrategy(restaurant.id)]);
+  const engById = new Map(engineering.dishes.map((d) => [d.id, d]));
   const strategy = latest ? (JSON.parse(latest.data) as Strategy) : null;
   const byId = new Map(analysis.dishes.map((d) => [d.id, d]));
   const dishes = recipes
@@ -24,6 +25,9 @@ export default async function MenuDesignPage() {
         foodCostPct: a?.foodCostPct ?? null,
         margin: a?.hasRecipe ? a.margin : null,
         monthlySales: r.monthlySales,
+        pavesic: engById.get(r.id)?.pavesic ?? null,
+        goalRatio: engById.get(r.id)?.goalRatio ?? null,
+        abc: engById.get(r.id)?.abc ?? null,
       };
     });
 
